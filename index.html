@@ -92,7 +92,7 @@
 
     // Fallback to the default voice of none is set.
     // NOTE: We do this asynchromously to give the voices time to populate the selector.
-    setTimeout(() => $.settings.voice = $.settings.voice || $.voices[0].name, 100);
+    setTimeout(() => $.settings.voice = $.settings.voice || $.voices[0]?.name, 100);
   };
 
   $.setval = function (key, value) {
