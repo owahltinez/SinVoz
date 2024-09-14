@@ -102,7 +102,7 @@
 
   $.llm = async function (text) {
     const url = new URL(`https://functions.fresho.workers.dev/genai/completion.txt`);
-    const prompt = `Come up with a createive and snarky way of saying "${text}" in less than 10 words. Keep it simple and feel free to use expelletives.`;
+    const prompt = `Come up with a createive and slightly snarky way of saying "${text}" in less than 10 words. Keep it simple and feel free to use expelletives.`;
     url.searchParams.append('prompt', prompt);
     url.searchParams.append('provider', 'openai');
     const res = await fetch(url);
