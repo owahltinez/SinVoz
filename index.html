@@ -4,6 +4,21 @@
   <title>SinVoz Speech Helper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="//unpkg.com/mancha@0.9" css="utils" init></script>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" href="./sinvoz.png">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registered:', registration);
+          })
+          .catch(error => {
+            console.log('Service Worker registration failed:', error);
+          });
+      });
+    }
+  </script>
 </head>
 
 <body class="p-4" :data="{

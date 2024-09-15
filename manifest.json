@@ -1,0 +1,15 @@
+{
+  "name": "SinVoz Speech Helper",
+  "short_name": "SinVoz",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/sinvoz.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
