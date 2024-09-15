@@ -104,25 +104,28 @@
   const { $ } = Mancha;
 
   // Create a dummy speech synthesis to load the voices.
-  setTimeout(() => {
-    const synth = new SpeechSynthesisUtterance('');
+  setTimeout(async () => {
+    const synth = new SpeechSynthesisUtterance('eh');
     speechSynthesis.speak(synth);
-  }, 100);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    speechSynthesis.cancel();
+  }, 250);
 
   // When the voices are loaded, set the voice to the first one.
-  window.speechSynthesis.onvoiceschanged = () => {
+  speechSynthesis.onvoiceschanged = () => {
     const availableVoices = speechSynthesis.getVoices();
     if (!availableVoices.length) return;
-
+    
     // Cache the available voices into a variable.
     $.voices = availableVoices;
-
+    
     // Load settings from local storage.
     $.settings = JSON.parse(localStorage.getItem('settings')) || $.settings;
-
+    
     // Fallback to the default voice of none is set.
     // NOTE: We do this asynchromously to give the voices time to populate the selector.
-    setTimeout(() => $.settings.voice = $.settings.voice || $.voices[0]?.name, 100);
+    const defaultVoice = availableVoices.find(voice => voice.default);
+    setTimeout(() => $.settings.voice = $.settings.voice || defaultVoice?.name, 250);
   };
 
   $.setval = function (key, value) {
@@ -145,12 +148,15 @@
 
   $.speak = async function (text) {
     // If there is an active speech synthesis, stop it.
-    if (window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
+    if (speechSynthesis.speaking) {
+      speechSynthesis.cancel();
     }
 
+    // Prompt the user for the text to speak if none is provided.
     if (!text) text = prompt('Enter the text to speak');
-    console.log('speaking', text);
+    if (!text) return;
+
+    // Generate a new text using the language model.
     const speech = await $.llm(text);
 
     // Create a new speech synthesis.
@@ -163,7 +169,7 @@
     synth.voice = $.voices.find(voice => voice.name === $.settings.voice) || $.voices[0];
 
     // Start the speech synthesis.
-    window.speechSynthesis.speak(synth);
+    speechSynthesis.speak(synth);
   };
 </script>
 
