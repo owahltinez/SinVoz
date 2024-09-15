@@ -99,12 +99,13 @@
   </div>
 </body>
 
-<script>
+<script async defer>
 
   const { $ } = Mancha;
 
-  // Create a global utterance object.
-  const synth = new SpeechSynthesisUtterance();
+  // Create a dummy speech synthesis to load the voices.
+  const synth = new SpeechSynthesisUtterance('');
+  speechSynthesis.speak(synth);
 
   // When the voices are loaded, set the voice to the first one.
   window.speechSynthesis.onvoiceschanged = () => {
@@ -158,7 +159,6 @@
     synth.volume = $.settings.volume;
     synth.pitch = $.settings.pitch;
     synth.voice = $.voices.find(voice => voice.name === $.settings.voice) || $.voices[0];
-    console.log(synth);
 
     // Start the speech synthesis.
     window.speechSynthesis.speak(synth);
