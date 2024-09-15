@@ -83,7 +83,7 @@
   </section>
 
   <div class="flex flex-wrap gap-4 justify-center" :show="!settings.page.localeCompare('speech')">
-    <speech-button :data="{ label: 'custom' }"></speech-button>
+    <speech-button :class="'w-full'" :data="{ label: 'custom' }"></speech-button>
     <speech-button :data="{ text: 'yes' }"></speech-button>
     <speech-button :data="{ text: 'no' }"></speech-button>
     <speech-button :data="{ text: 'I agree' }"></speech-button>
@@ -93,6 +93,9 @@
     <speech-button :data="{ text: 'I do not care' }"></speech-button>
     <speech-button :data="{ text: 'you choose' }"></speech-button>
     <speech-button :data="{ text: 'look at this' }"></speech-button>
+    <speech-button :data="{ text: 'what is that?' }"></speech-button>
+    <speech-button :data="{ text: 'you are right' }"></speech-button>
+    <speech-button :data="{ text: 'you are wrong' }"></speech-button>
     <speech-button :data="{ text: 'I like it' }"></speech-button>
     <speech-button :data="{ text: 'I do not like it' }"></speech-button>
     <speech-button :data="{ text: 'we should leave' }"></speech-button>
