@@ -1,3 +1,5 @@
+<html style="overscroll-behavior: none;">
+
 <head>
   <title>SinVoz Speech Helper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -6,17 +8,19 @@
 
 <body class="p-4" :data="{
   voices: [],
+  personas: ['slightly snarky', 'very kind', 'neutral', 'robotic'],
   settings: {
-    page: 'settings',
+    page: 'speech',
     rate: 1,
     volume: 1,
     pitch: 1,
     voice: null,
+    persona: 'null',
   }
 }">
 
   <template is="speech-button">
-    <button class="px-4 py-2 bg-transparent hover:bg-gray-100" :on:click="s(text)">{{ text || 'custom' }}</button>
+    <button class="px-4 py-2 bg-transparent hover:bg-gray-100" :on:click="speak(text)">{{ text || label }}</button>
   </template>
 
   <h1>SinVoz Speech Helper</h1>
@@ -29,9 +33,7 @@
   <!-- Horizontal line -->
   <hr class="my-4" />
 
-  <section class="flex flex-col" :show="!settings.page.localeCompare('settings')">
-    <h2>Settings</h2>
-
+  <section class="flex flex-col gap-y-2" :show="!settings.page.localeCompare('settings')">
     <label class="flex flex-row">
       <span class="w-32">Rate: {{ settings.rate }}</span>
       <input class="w-full" type="range" min="0.1" max="10" step="0.1" :value="settings.rate"
@@ -56,21 +58,28 @@
         <option :for="voice in voices">{{ voice.name }}</option>
       </select>
     </label>
+
+    <label class="flex flex-row">
+      <span class="w-32">Persona</span>
+      <select class="w-full" :value="settings.persona" :on:change="setval('persona', $event.target.value)">
+        <option :for="persona in personas">{{ persona }}</option>
+      </select>
+    </label>
   </section>
 
   <div class="flex flex-wrap gap-4" :show="!settings.page.localeCompare('speech')">
-    <speech-button :data="{ text: null }"></speech-button>
+    <speech-button :data="{ label: 'custom' }"></speech-button>
     <speech-button :data="{ text: 'yes' }"></speech-button>
-    <speech-button :data="{ text: 'super yes' }"></speech-button>
     <speech-button :data="{ text: 'no' }"></speech-button>
-    <speech-button :data="{ text: 'super no' }"></speech-button>
-    <speech-button :data="{ text: 'agree' }"></speech-button>
-    <speech-button :data="{ text: 'disagree' }"></speech-button>
+    <speech-button :data="{ text: 'I agree' }"></speech-button>
+    <speech-button :data="{ text: 'I disagree' }"></speech-button>
     <speech-button :data="{ text: 'I pick the first one' }"></speech-button>
     <speech-button :data="{ text: 'I pick the last one' }"></speech-button>
     <speech-button :data="{ text: 'I do not care' }"></speech-button>
     <speech-button :data="{ text: 'you choose' }"></speech-button>
     <speech-button :data="{ text: 'look at this' }"></speech-button>
+    <speech-button :data="{ text: 'I like it' }"></speech-button>
+    <speech-button :data="{ text: 'I do not like it' }"></speech-button>
     <speech-button :data="{ text: 'we should leave' }"></speech-button>
   </div>
 </body>
@@ -78,14 +87,17 @@
 <script>
 
   const { $ } = Mancha;
-  $.page = 'settings';
 
   // Create a global utterance object.
   const synth = new SpeechSynthesisUtterance();
 
   // When the voices are loaded, set the voice to the first one.
   window.speechSynthesis.onvoiceschanged = () => {
-    $.voices = speechSynthesis.getVoices();
+    const availableVoices = speechSynthesis.getVoices();
+    if (!availableVoices.length) return;
+
+    // Cache the available voices into a variable.
+    $.voices = availableVoices;
 
     // Load settings from local storage.
     $.settings = JSON.parse(localStorage.getItem('settings')) || $.settings;
@@ -102,24 +114,27 @@
 
   $.llm = async function (text) {
     const url = new URL(`https://functions.fresho.workers.dev/genai/completion.txt`);
-    const prompt = `Come up with a createive and slightly snarky way of saying "${text}" in less than 10 words. Keep it simple and feel free to use expelletives.`;
+    const prompt = `Come up with a createive and ${$.settings.persona} way of rephrasing a ` +
+      `sentence in less than 10 words. Keep it simple and feel free to use expelletives.\n\n` +
+      `Sentence: ${text}. Rephrased: `;
     url.searchParams.append('prompt', prompt);
     url.searchParams.append('provider', 'openai');
     const res = await fetch(url);
     if (res.ok) return res.text();
-    console.log('Failed to fetch from API');
+    console.error('Failed to fetch from API');
     return text;
   }
 
-  $.s = async function (text) {
-    if (!text) text = prompt('Enter the text to speak');
-    console.log('speaking', text);
-    const speech = await $.llm(text);
-
+  $.speak = async function (text) {
     // If there is an active speech synthesis, stop it.
     if (window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
     }
+
+    if (!text) text = prompt('Enter the text to speak');
+    console.log('speaking', text);
+    const speech = await $.llm(text);
+
     // Create a new speech synthesis.
     const synth = new SpeechSynthesisUtterance(speech);
 
@@ -134,3 +149,5 @@
     window.speechSynthesis.speak(synth);
   };
 </script>
+
+</html>
