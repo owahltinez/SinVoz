@@ -104,8 +104,10 @@
   const { $ } = Mancha;
 
   // Create a dummy speech synthesis to load the voices.
-  const synth = new SpeechSynthesisUtterance('');
-  speechSynthesis.speak(synth);
+  setTimeout(() => {
+    const synth = new SpeechSynthesisUtterance('');
+    speechSynthesis.speak(synth);
+  }, 100);
 
   // When the voices are loaded, set the voice to the first one.
   window.speechSynthesis.onvoiceschanged = () => {
