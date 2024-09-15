@@ -132,7 +132,7 @@
     const url = new URL(`https://functions.fresho.workers.dev/genai/completion.txt`);
     const prompt = `Come up with a createive and ${$.settings.persona} way of rephrasing a ` +
       `sentence in less than 10 words. Keep it simple and feel free to use expelletives.\n\n` +
-      `Sentence: ${text}. Rephrased: `;
+      `Original sentence: ${text}.\n\nRephrased: `;
     url.searchParams.append('prompt', prompt);
     url.searchParams.append('provider', 'openai');
     const res = await fetch(url);
