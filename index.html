@@ -21,7 +21,7 @@
   </script>
 </head>
 
-<body class="p-4" :data="{
+<body class="p-4 max-w-128 mx-auto" :data="{
   voices: [],
   personas: ['slightly snarky', 'very kind', 'neutral', 'robotic'],
   settings: {
@@ -35,18 +35,18 @@
 }">
 
   <template is="speech-button">
-    <button class="px-4 py-2 bg-transparent hover:bg-gray-100" :on:click="speak(text)">{{ text || label }}</button>
+    <button class="w-36 px-4 py-2 bg-white border-1 hover:bg-gray-100 cursor-pointer" :on:click="speak(text)">{{ text || label }}</button>
   </template>
 
-  <h1>SinVoz Speech Helper</h1>
+  <h1 class="block text-center">SinVoz Speech Helper</h1>
   <!-- Tabs for the different screens -->
-  <nav class="flex flex-row gap-4">
-    <button class="text-xl bg-transparent border-none" :on:click="setval('page', 'speech')">Speech</button>
-    <button class="text-xl bg-transparent border-none" :on:click="setval('page', 'settings')">Settings</button>
+  <nav class="flex flex-row gap-4 justify-center">
+    <button class="text-xl px-4 py-2 bg-white border-none hover:bg-gray-100 cursor-pointer" :on:click="setval('page', 'speech')">Speech</button>
+    <button class="text-xl px-4 py-2 bg-white border-none hover:bg-gray-100 cursor-pointer" :on:click="setval('page', 'settings')">Settings</button>
   </nav>
 
   <!-- Horizontal line -->
-  <hr class="my-4" />
+  <hr class="mb-4" />
 
   <section class="flex flex-col gap-y-2" :show="!settings.page.localeCompare('settings')">
     <label class="flex flex-row">
@@ -82,7 +82,7 @@
     </label>
   </section>
 
-  <div class="flex flex-wrap gap-4" :show="!settings.page.localeCompare('speech')">
+  <div class="flex flex-wrap gap-4 justify-center" :show="!settings.page.localeCompare('speech')">
     <speech-button :data="{ label: 'custom' }"></speech-button>
     <speech-button :data="{ text: 'yes' }"></speech-button>
     <speech-button :data="{ text: 'no' }"></speech-button>
