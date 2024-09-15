@@ -30,7 +30,7 @@
     volume: 1,
     pitch: 1,
     voice: null,
-    persona: 'null',
+    persona: 'neutral',
   }
 }">
 
@@ -69,7 +69,7 @@
 
     <label class="flex flex-row">
       <span class="w-32">Voice</span>
-      <select id="voicesel" class="w-full" :value="settings.voice" :on:change="setval('voice', $event.target.value)">
+      <select class="w-full" :value="settings.voice" :on:change="setval('voice', $event.target.value)">
         <option :for="voice in voices">{{ voice.name }}</option>
       </select>
     </label>
