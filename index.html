@@ -22,7 +22,8 @@
 </head>
 
 <body class="p-4 max-w-128 mx-auto" :data="{
-  voices: [],
+  statusColor: 'black',
+  statusMessage: 'Loading...',
   personas: ['slightly snarky', 'very kind', 'neutral', 'robotic'],
   settings: {
     page: 'speech',
@@ -41,6 +42,7 @@
   </template>
 
   <h1 class="block text-center">SinVoz Speech Helper</h1>
+
   <!-- Tabs for the different screens -->
   <nav class="flex flex-row gap-4 justify-center">
     <button class="text-xl px-4 py-2 bg-white border-none hover:bg-gray-100 cursor-pointer"
@@ -87,6 +89,11 @@
   </section>
 
   <div class="flex flex-wrap gap-4 justify-center" :show="!settings.page.localeCompare('speech')">
+    <!-- Status message -->
+    <div>
+      <span class="text-center" :class="'text-' + statusColor">{{ statusMessage }}</span>
+    </div>
+
     <speech-button :class="'w-full'" :data="{ label: 'custom' }"></speech-button>
     <speech-button :data="{ text: 'yes' }"></speech-button>
     <speech-button :data="{ text: 'no' }"></speech-button>
@@ -109,6 +116,12 @@
 <script type="module" async defer>
 
   const { $ } = Mancha;
+
+  const defaultStatus = 'Ensure your audio volume is up. Tap a button to speak.';
+  $.setStatus = function (status, color) {
+    $.statusMessage = status || defaultStatus;
+    $.statusColor = color || 'black';
+  };
 
   $.setval = function (key, value) {
     $.settings[key] = value;
@@ -141,6 +154,7 @@
     if (!text) return;
 
     // Generate a new text using the language model.
+    $.setStatus('Generating a new text', 'blue');
     const speech = await $.llm(text);
 
     // Create a new speech synthesis.
@@ -153,6 +167,8 @@
     synth.voice = $.voices.find(voice => voice.voiceURI === $.settings.voice) || $.voices[0];
 
     // Start the speech synthesis.
+    $.setStatus(`Speaking: "${speech}"`, 'green');
+    synth.onend = () => $.setStatus(defaultStatus);
     speechSynthesis.speak(synth);
   };
 
@@ -176,9 +192,12 @@
     } else {
       console.log('Using saved voice:', $.settings.voice);
     }
+
+    $.setStatus(defaultStatus);
   }
 
   // When the voices are loaded, set the voice to the first one.
+  $.setStatus('Loading voices...', 'blue');
   populateVoices();
   speechSynthesis.onvoiceschanged = populateVoices;
 
