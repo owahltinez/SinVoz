@@ -3,7 +3,7 @@
 <head>
   <title>SinVoz Speech Helper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="//unpkg.com/mancha@0.9" css="utils" init></script>
+  <script src="//unpkg.com/mancha@0.9" css="utils"></script>
   <link rel="manifest" href="./manifest.json">
   <link rel="icon" type="image/png" href="./sinvoz.png">
   <script>
@@ -35,14 +35,18 @@
 }">
 
   <template is="speech-button">
-    <button class="w-36 px-4 py-2 bg-white border-1 hover:bg-gray-100 cursor-pointer" :on:click="speak(text)">{{ text || label }}</button>
+    <button class="w-36 px-4 py-2 bg-white border-1 hover:bg-gray-100 cursor-pointer" :on:click="speak(text)">
+      {{ text || label }}
+    </button>
   </template>
 
   <h1 class="block text-center">SinVoz Speech Helper</h1>
   <!-- Tabs for the different screens -->
   <nav class="flex flex-row gap-4 justify-center">
-    <button class="text-xl px-4 py-2 bg-white border-none hover:bg-gray-100 cursor-pointer" :on:click="setval('page', 'speech')">Speech</button>
-    <button class="text-xl px-4 py-2 bg-white border-none hover:bg-gray-100 cursor-pointer" :on:click="setval('page', 'settings')">Settings</button>
+    <button class="text-xl px-4 py-2 bg-white border-none hover:bg-gray-100 cursor-pointer"
+      :on:click="setval('page', 'speech')">Speech</button>
+    <button class="text-xl px-4 py-2 bg-white border-none hover:bg-gray-100 cursor-pointer"
+      :on:click="setval('page', 'settings')">Settings</button>
   </nav>
 
   <!-- Horizontal line -->
@@ -70,7 +74,7 @@
     <label class="flex flex-row">
       <span class="w-32">Voice</span>
       <select class="w-full" :value="settings.voice" :on:change="setval('voice', $event.target.value)">
-        <option :for="voice in voices">{{ voice.name }}</option>
+        <option :for="voice in voices">{{ voice.voiceURI }}</option>
       </select>
     </label>
 
@@ -102,37 +106,13 @@
   </div>
 </body>
 
-<script async defer>
+<script type="module" async defer>
 
   const { $ } = Mancha;
 
-  // Create a dummy speech synthesis to load the voices.
-  setTimeout(async () => {
-    const synth = new SpeechSynthesisUtterance('eh');
-    speechSynthesis.speak(synth);
-    await new Promise(resolve => setTimeout(resolve, 100));
-    speechSynthesis.cancel();
-  }, 250);
-
-  // When the voices are loaded, set the voice to the first one.
-  speechSynthesis.onvoiceschanged = () => {
-    const availableVoices = speechSynthesis.getVoices();
-    if (!availableVoices.length) return;
-    
-    // Cache the available voices into a variable.
-    $.voices = availableVoices;
-    
-    // Load settings from local storage.
-    $.settings = JSON.parse(localStorage.getItem('settings')) || $.settings;
-    
-    // Fallback to the default voice of none is set.
-    // NOTE: We do this asynchromously to give the voices time to populate the selector.
-    const defaultVoice = availableVoices.find(voice => voice.default);
-    setTimeout(() => $.settings.voice = $.settings.voice || defaultVoice?.name, 250);
-  };
-
   $.setval = function (key, value) {
     $.settings[key] = value;
+    console.log('setting value:', key, value);
     localStorage.setItem('settings', JSON.stringify($.settings));
   };
 
@@ -156,6 +136,7 @@
     }
 
     // Prompt the user for the text to speak if none is provided.
+    text = (text || '').trim();
     if (!text) text = prompt('Enter the text to speak');
     if (!text) return;
 
@@ -169,11 +150,40 @@
     synth.rate = $.settings.rate;
     synth.volume = $.settings.volume;
     synth.pitch = $.settings.pitch;
-    synth.voice = $.voices.find(voice => voice.name === $.settings.voice) || $.voices[0];
+    synth.voice = $.voices.find(voice => voice.voiceURI === $.settings.voice) || $.voices[0];
 
     // Start the speech synthesis.
     speechSynthesis.speak(synth);
   };
+
+  function populateVoices() {
+    const availableVoices = speechSynthesis.getVoices();
+    if (availableVoices.length === 0) return;
+    console.log('Voices loaded:', availableVoices);
+
+    // Cache the available voices into a variable.
+    $.voices = availableVoices;
+
+    // Load settings from local storage.
+    $.settings = { ...$.settings, ...JSON.parse(localStorage.getItem('settings')) };
+    console.log('Settings loaded:', $.settings);
+
+    // Fallback to the default voice of none is set.
+    if (!$.settings.voice) {
+      console.log('No voice set, using default voice');
+      const defaultVoice = availableVoices.find(voice => voice.default);
+      $.setval('voice', defaultVoice.voiceURI || availableVoices[0].voiceURI);
+    } else {
+      console.log('Using saved voice:', $.settings.voice);
+    }
+  }
+
+  // When the voices are loaded, set the voice to the first one.
+  populateVoices();
+  speechSynthesis.onvoiceschanged = populateVoices;
+
+  await $.mount(document.body);
+
 </script>
 
 </html>
