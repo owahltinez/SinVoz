@@ -22,6 +22,9 @@
 </head>
 
 <body class="p-4 max-w-128 mx-auto" :data="{
+  voices: [],
+  statusColor: 'black',
+  statusMessage: 'Loading...',
   personas: ['slightly snarky', 'very kind', 'neutral', 'robotic'],
   settings: {
     page: 'speech',
@@ -194,12 +197,12 @@
     $.setStatus(defaultStatus);
   }
 
+  await $.mount(document.body);
+
   // When the voices are loaded, set the voice to the first one.
   $.setStatus('Loading...', 'blue');
   populateVoices();
   speechSynthesis.onvoiceschanged = populateVoices;
-
-  await $.mount(document.body);
 
 </script>
 
