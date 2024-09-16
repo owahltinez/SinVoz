@@ -149,6 +149,11 @@
       speechSynthesis.cancel();
     }
 
+    // Produce a dummy speech to maintain audio focus.
+    // See: https://stackoverflow.com/a/72199291
+    const dummy = new SpeechSynthesisUtterance(' ');
+    speechSynthesis.speak(dummy);
+
     // Prompt the user for the text to speak if none is provided.
     text = (text || '').trim();
     if (!text) text = prompt('Enter the text to speak');
